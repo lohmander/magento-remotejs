@@ -13,7 +13,7 @@ To add an external javascript write:
 
 For CSS:
 ```xml
-  <action method="addRemoteCss"><href>//cdn.yourdomain.com/style.css</href></action>
+<action method="addRemoteCss"><href>//cdn.yourdomain.com/style.css</href></action>
 ```
 License
 -------

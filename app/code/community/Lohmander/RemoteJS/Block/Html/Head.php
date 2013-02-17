@@ -37,12 +37,25 @@ class Lohmander_RemoteJS_Block_Html_Head
     *
     * @param string $name
     * @param string $params
-    * @param return Lohmander_RemoteJS_Block_Html_Head
+    * @return Lohmander_RemoteJS_Block_Html_Head
     */
     public function addRemoteJs($name, $params = "")
     {
         $this->addItem('remote_js', $name, $params);
         return this;
+    }
+
+    /**
+    * Add CSS stylsheet located on remote server
+    *
+    * @param string @name
+    * @param string @params
+    * @return Lohmander_RemoteJS_Block_Html_Head
+    */
+    public function addRemoteCss($name, $param = "")
+    {
+        $this->addItem('remote_css', $name, $params);
+        return $this;
     }
 
     /**
@@ -71,6 +84,9 @@ class Lohmander_RemoteJS_Block_Html_Head
                 break;
             case 'remote_js':
                 $lines[$itemIf]['other'][] = sprintf('<script type="text/javascript" src="%s" %s></script>', $href, $params);
+                break;
+            case 'remote_css':
+                $lines[$itemIf]['other'][] = sprintf('<link rel="stylesheet" type="text/css" href="%s" %s>', $href, $params);
                 break;
         }
     }

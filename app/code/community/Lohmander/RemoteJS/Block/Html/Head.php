@@ -38,10 +38,11 @@ class Lohmander_RemoteJS_Block_Html_Head
     * @param string $name
     * @param string $params
     * @return Lohmander_RemoteJS_Block_Html_Head
+    * @deprecated 0.2.0
     */
     public function addRemoteJs($name, $params = "")
     {
-        $this->addItem('remote_js', $name, $params);
+        $this->addItem('js', $name, $params);
         return this;
     }
 
@@ -51,75 +52,62 @@ class Lohmander_RemoteJS_Block_Html_Head
     * @param string @name
     * @param string @params
     * @return Lohmander_RemoteJS_Block_Html_Head
+    * @deprecated 0.2.0
     */
     public function addRemoteCss($name, $param = "")
     {
-        $this->addItem('remote_css', $name, $params);
+        $this->addItem('css', $name, $params);
         return $this;
     }
 
-    /**
-     * Classify HTML head item and queue it into "lines" array
-     *
-     * @see self::getCssJsHtml()
-     * @param array &$lines
-     * @param string $itemIf
-     * @param string $itemType
-     * @param string $itemParams
-     * @param string $itemName
-     * @param array $itemThe
-     */
-    protected function _separateOtherHtmlHeadElements(&$lines, $itemIf, $itemType, $itemParams, $itemName, $itemThe)
+    protected function &_prepareStaticAndSkinElements($format, array $staticItems, array $skinItems, $mergeCallback = null)
     {
-        $params = $itemParams ? ' ' . $itemParams : '';
-        $href   = $itemName;
-        switch ($itemType) {
-            case 'rss':
-                $lines[$itemIf]['other'][] = sprintf('<link href="%s"%s rel="alternate" type="application/rss+xml" />',
-                    $href, $params
-                );
-                break;
-            case 'link_rel':
-                $lines[$itemIf]['other'][] = sprintf('<link%s href="%s" />', $params, $href);
-                break;
-            case 'remote_js':
-                $lines[$itemIf]['other'][] = sprintf('<script type="text/javascript" src="%s" %s></script>', $href, $params);
-                break;
-            case 'remote_css':
-                $lines[$itemIf]['other'][] = sprintf('<link rel="stylesheet" type="text/css" href="%s" %s>', $href, $params);
-                break;
+        $designPackage = Mage::getDesign();
+        $baseJsUrl = Mage::getBaseUrl('js');
+        $items = array();
+        if ($mergeCallback && !is_callable($mergeCallback)) {
+            $mergeCallback = null;
         }
-    }
 
-    /**
-     * Add HEAD Item
-     *
-     * Allowed types:
-     *  - js
-     *  - js_css
-     *  - skin_js
-     *  - skin_css
-     *  - rss
-     *
-     * @param string $type
-     * @param string $name
-     * @param string $params
-     * @param string $if
-     * @param string $cond
-     * @return Mage_Page_Block_Html_Head
-     */
-    public function addItem($type, $name, $params=null, $if=null, $cond=null)
-    {
-        if ($type==='skin_css' && empty($params)) {
-            $params = 'media="all"';
+
+        // get static files from the js folder, no need in lookups
+        foreach ($staticItems as $params => $rows) {
+            foreach ($rows as $name) {
+                if (substr($name, 0, 2) == '//'
+                    || substr($name, 0, 7) == 'http://') {
+                    $items[$params][] = $name;
+                } else {
+                    $items[$params][] = $mergeCallback ? Mage::getBaseDir() . DS . 'js' . DS . $name : $baseJsUrl . $name;
+                }
+            }
         }
-        $this->_data['items'][] = array(
-            'type'   => $type,
-            'name'   => $name,
-            'params' => $params,
-            'if'     => $if,
-            'cond'   => $cond,
-       );
-        return $this;
+
+        // lookup each file basing on current theme configuration
+        foreach ($skinItems as $params => $rows) {
+            foreach ($rows as $name) {
+                $items[$params][] = $mergeCallback ? $designPackage->getFilename($name, array('_type' => 'skin'))
+                    : $designPackage->getSkinUrl($name, array());
+            }
+        }
+
+        $html = '';
+        foreach ($items as $params => $rows) {
+            // attempt to merge
+            $mergedUrl = false;
+            if ($mergeCallback) {
+                $mergedUrl = call_user_func($mergeCallback, $rows);
+            }
+            // render elements
+            $params = trim($params);
+            $params = $params ? ' ' . $params : '';
+            if ($mergedUrl) {
+                $html .= sprintf($format, $mergedUrl, $params);
+            } else {
+                foreach ($rows as $src) {
+                    $html .= sprintf($format, $src, $params);
+                }
+            }
+        }
+        return $html;
     }
 }

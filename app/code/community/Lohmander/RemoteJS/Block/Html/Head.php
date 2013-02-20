@@ -90,4 +90,36 @@ class Lohmander_RemoteJS_Block_Html_Head
                 break;
         }
     }
+
+    /**
+     * Add HEAD Item
+     *
+     * Allowed types:
+     *  - js
+     *  - js_css
+     *  - skin_js
+     *  - skin_css
+     *  - rss
+     *
+     * @param string $type
+     * @param string $name
+     * @param string $params
+     * @param string $if
+     * @param string $cond
+     * @return Mage_Page_Block_Html_Head
+     */
+    public function addItem($type, $name, $params=null, $if=null, $cond=null)
+    {
+        if ($type==='skin_css' && empty($params)) {
+            $params = 'media="all"';
+        }
+        $this->_data['items'][] = array(
+            'type'   => $type,
+            'name'   => $name,
+            'params' => $params,
+            'if'     => $if,
+            'cond'   => $cond,
+       );
+        return $this;
+    }
 }

@@ -75,7 +75,7 @@ class Lohmander_RemoteJS_Block_Html_Head
             foreach ($rows as $name) {
                 if (substr($name, 0, 2) == '//'
                     || substr($name, 0, 7) == 'http://'
-                    || substr($name, 0, 7) == 'https://') {
+                    || substr($name, 0, 8) == 'https://') {
                     $items[$params][] = $name;
                 } else {
                     $items[$params][] = $mergeCallback ? Mage::getBaseDir() . DS . 'js' . DS . $name : $baseJsUrl . $name;

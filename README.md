@@ -16,7 +16,7 @@ For CSS:
 <action method="addCss"><href>//cdn.yourdomain.com/style.css</href></action>
 ```
 
-The key is using either // or http:// and it'll automatically understand that it should not prepend the site url.
+The key is using either "//", "http://" or "https://" and it'll automatically understand that it should not prepend the site url.
 
 License
 -------

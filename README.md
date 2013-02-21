@@ -3,6 +3,10 @@ magento-remotejs
 
 Adding support for remote JS and CSS in Magento layout files.
 
+Unlike other modules with seemingly similar functionality, this one treats the remote files the same 
+way any other JS (or CSS) that's been added with "addJs" (or "addCss"). This means it will be rendered in 
+the order specified in your layout file, unlike with many other solutions.
+
 How to use
 ----------
 
